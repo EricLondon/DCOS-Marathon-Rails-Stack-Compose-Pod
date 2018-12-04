@@ -1,0 +1,109 @@
+{
+  "id": "/rails-stack",
+  "containers": [
+    {
+      "name": "api",
+      "resources": {
+        "cpus": 0.1,
+        "mem": 128,
+        "disk": 0
+      },
+      "exec": {
+        "command": {
+          "shell": "/api/bin/start-rails.sh"
+        }
+      },
+      "image": {
+        "kind": "DOCKER",
+        "id": "ericlondon/dcos-stack-api:latest",
+        "forcePull": true
+      },
+      "endpoints": [
+        {
+          "name": "rails-stack-api",
+          "containerPort": 3000,
+          "hostPort": 0,
+          "protocol": [
+            "tcp"
+          ],
+          "labels": {
+            "VIP_0": "/rails-stack:3000"
+          }
+        }
+      ],
+      "environment": {
+        "POSTGRES_PASSWORD": "postgres",
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_HOST": "localhost",
+        "RAILS_ENV": "development",
+        "RAILS_PORT": "3000",
+        "POSTGRES_PORT": "5432"
+      }
+    },
+    {
+      "name": "postgres",
+      "resources": {
+        "cpus": 0.1,
+        "mem": 128,
+        "disk": 0
+      },
+      "image": {
+        "kind": "DOCKER",
+        "id": "ericlondon/dcos-stack-postgres:latest",
+        "forcePull": true
+      },
+      "endpoints": [
+        {
+          "name": "rails-stack-postgres",
+          "containerPort": 5432,
+          "hostPort": 0,
+          "protocol": [
+            "tcp"
+          ],
+          "labels": {
+            "VIP_0": "/rails-stack:5432"
+          }
+        }
+      ],
+      "environment": {
+        "POSTGRES_PASSWORD": "postgres",
+        "POSTGRES_USER": "postgres"
+      }
+    },
+    {
+      "name": "nginx",
+      "resources": {
+        "cpus": 0.1,
+        "mem": 128,
+        "disk": 0
+      },
+      "exec": {
+        "command": {
+          "shell": "/start-nginx.sh"
+        }
+      },
+      "image": {
+        "kind": "DOCKER",
+        "id": "ericlondon/dcos-stack-nginx:latest",
+        "forcePull": true
+      },
+      "endpoints": [
+        {
+          "name": "rails-stack-nginx",
+          "containerPort": 80,
+          "hostPort": 0,
+          "protocol": [
+            "tcp"
+          ],
+          "labels": {
+            "VIP_0": "/rails-stack:80"
+          }
+        }
+      ],
+      "environment": {
+        "API_HOST": "localhost",
+        "API_PORT": "3000"
+      }
+    }
+  ]
+}

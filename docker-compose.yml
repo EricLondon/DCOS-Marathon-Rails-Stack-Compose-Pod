@@ -1,0 +1,43 @@
+version: '3'
+services:
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    command: /api/bin/start-rails.sh
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST=postgres
+      - RAILS_ENV=development
+      - RAILS_PORT=3000
+      - POSTGRES_PORT=5432
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    command: /start-nginx.sh
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    environment:
+      - API_HOST=api
+      - API_PORT=3000
+volumes:
+  postgres: {}
